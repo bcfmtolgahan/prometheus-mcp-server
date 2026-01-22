@@ -56,7 +56,7 @@ prometheus-mcp-server --transport http
 ```bash
 docker run -p 8000:8000 \
   -e PROMETHEUS_MCP_URL=http://prometheus:9090 \
-  ghcr.io/punkpeye/prometheus-mcp-server:latest
+  ghcr.io/bcfmtolgahan/prometheus-mcp-server:latest
 ```
 
 ## Available Tools (38 Total)
@@ -289,7 +289,7 @@ silence = await alertmanager_create_silence(
 ### Setup
 
 ```bash
-git clone https://github.com/punkpeye/prometheus-mcp-server.git
+git clone https://github.com/bcfmtolgahan/prometheus-mcp-server.git
 cd prometheus-mcp-server
 
 python -m venv .venv

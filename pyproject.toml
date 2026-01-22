@@ -9,10 +9,10 @@ description = "A production-grade Model Context Protocol (MCP) server for Promet
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
-    { name = "punkpeye" }
+    { name = "Tolgahan Demirbas", email = "tolgahan@demirbas.dev" }
 ]
 maintainers = [
-    { name = "punkpeye" }
+    { name = "Tolgahan Demirbas", email = "tolgahan@demirbas.dev" }
 ]
 keywords = [
     "mcp",
@@ -74,11 +74,11 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/punkpeye/prometheus-mcp-server"
-Documentation = "https://github.com/punkpeye/prometheus-mcp-server#readme"
-Repository = "https://github.com/punkpeye/prometheus-mcp-server.git"
-Issues = "https://github.com/punkpeye/prometheus-mcp-server/issues"
-Changelog = "https://github.com/punkpeye/prometheus-mcp-server/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/bcfmtolgahan/prometheus-mcp-server"
+Documentation = "https://github.com/bcfmtolgahan/prometheus-mcp-server#readme"
+Repository = "https://github.com/bcfmtolgahan/prometheus-mcp-server.git"
+Issues = "https://github.com/bcfmtolgahan/prometheus-mcp-server/issues"
+Changelog = "https://github.com/bcfmtolgahan/prometheus-mcp-server/blob/main/CHANGELOG.md"
 
 [project.scripts]
 prometheus-mcp-server = "prometheus_mcp_server.cli:main"

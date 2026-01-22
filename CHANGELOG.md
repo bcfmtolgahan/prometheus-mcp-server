@@ -93,5 +93,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Read-only root filesystem
 - Network policies for egress control
 
-[2.0.0]: https://github.com/punkpeye/prometheus-mcp-server/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/punkpeye/prometheus-mcp-server/releases/tag/v1.0.0
+[2.0.0]: https://github.com/bcfmtolgahan/prometheus-mcp-server/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/bcfmtolgahan/prometheus-mcp-server/releases/tag/v1.0.0

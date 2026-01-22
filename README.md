@@ -264,18 +264,18 @@ silence = await alertmanager_create_silence(
                          ▼
 ┌─────────────────────────────────────────────────────────┐
 │              Prometheus MCP Server                      │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │              38 MCP Tools                         │  │
-│  │  • Query & Metadata    • SRE Golden Signals      │  │
-│  │  • Alerts & Rules      • Analysis Tools          │  │
-│  │  • PromQL Helpers      • Alertmanager            │  │
-│  └──────────────────────┬───────────────────────────┘  │
-│                         │                              │
-│  ┌──────────────────────▼───────────────────────────┐  │
-│  │              Prometheus Client                    │  │
-│  │    • Connection pooling  • Retry logic           │  │
-│  │    • Authentication      • TLS support           │  │
-│  └──────────────────────┬───────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │              38 MCP Tools                        │   │
+│  │  • Query & Metadata    • SRE Golden Signals      │   │
+│  │  • Alerts & Rules      • Analysis Tools          │   │
+│  │  • PromQL Helpers      • Alertmanager            │   │
+│  └──────────────────────┬───────────────────────────┘   │
+│                         │                               │
+│  ┌──────────────────────▼───────────────────────────┐   │
+│  │              Prometheus Client                   │   │
+│  │    • Connection pooling  • Retry logic           │   │
+│  │    • Authentication      • TLS support           │   │
+│  └──────────────────────┬───────────────────────────┘   │
 └─────────────────────────┼───────────────────────────────┘
                           │ HTTP/HTTPS
                           ▼

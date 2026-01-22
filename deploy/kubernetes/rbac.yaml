@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-mcp-server
+  labels:
+    app.kubernetes.io/name: prometheus-mcp-server
+    app.kubernetes.io/component: mcp-server
+---
+# NetworkPolicy to restrict egress to only Prometheus
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-mcp-server
+  labels:
+    app.kubernetes.io/name: prometheus-mcp-server
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-mcp-server
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from any pod (MCP clients)
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # Allow DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow HTTPS to external Prometheus (if needed)
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 9090
+---
+# PodDisruptionBudget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: prometheus-mcp-server
+  labels:
+    app.kubernetes.io/name: prometheus-mcp-server
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-mcp-server

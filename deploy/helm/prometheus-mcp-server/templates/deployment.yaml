@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "prometheus-mcp-server.fullname" . }}
+  labels:
+    {{- include "prometheus-mcp-server.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "prometheus-mcp-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "prometheus-mcp-server.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "prometheus-mcp-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: PROMETHEUS_MCP_URL
+              value: {{ .Values.prometheus.url | quote }}
+            - name: PROMETHEUS_MCP_TRANSPORT
+              value: "http"
+            - name: PROMETHEUS_MCP_HOST
+              value: "0.0.0.0"
+            - name: PROMETHEUS_MCP_PORT
+              value: {{ .Values.service.port | quote }}
+            - name: PROMETHEUS_MCP_LOG_LEVEL
+              value: {{ .Values.logging.level | quote }}
+            - name: PROMETHEUS_MCP_LOG_FORMAT
+              value: {{ .Values.logging.format | quote }}
+            - name: PROMETHEUS_MCP_TIMEOUT
+              value: {{ .Values.server.timeout | quote }}
+            - name: PROMETHEUS_MCP_MAX_RETRIES
+              value: {{ .Values.server.maxRetries | quote }}
+            - name: PROMETHEUS_MCP_RETRY_DELAY
+              value: {{ .Values.server.retryDelay | quote }}
+            - name: PROMETHEUS_MCP_MAX_CONNECTIONS
+              value: {{ .Values.server.maxConnections | quote }}
+            - name: PROMETHEUS_MCP_TLS_VERIFY
+              value: {{ .Values.tls.verify | quote }}
+            - name: PROMETHEUS_MCP_ENABLE_DANGEROUS_TOOLS
+              value: {{ .Values.features.enableDangerousTools | quote }}
+            - name: PROMETHEUS_MCP_MAX_QUERY_SAMPLES
+              value: {{ .Values.features.maxQuerySamples | quote }}
+            - name: PROMETHEUS_MCP_DEFAULT_LOOKBACK
+              value: {{ .Values.features.defaultLookback | quote }}
+            - name: PROMETHEUS_MCP_DEFAULT_STEP
+              value: {{ .Values.features.defaultStep | quote }}
+            {{- if ne .Values.auth.type "none" }}
+            - name: PROMETHEUS_MCP_AUTH_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "prometheus-mcp-server.authSecretName" . }}
+                  key: {{ .Values.auth.authTypeKey }}
+            {{- if or (eq .Values.auth.type "basic") .Values.auth.existingSecret }}
+            - name: PROMETHEUS_MCP_AUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "prometheus-mcp-server.authSecretName" . }}
+                  key: {{ .Values.auth.usernameKey }}
+                  optional: true
+            - name: PROMETHEUS_MCP_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "prometheus-mcp-server.authSecretName" . }}
+                  key: {{ .Values.auth.passwordKey }}
+                  optional: true
+            {{- end }}
+            {{- if or (eq .Values.auth.type "bearer") .Values.auth.existingSecret }}
+            - name: PROMETHEUS_MCP_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "prometheus-mcp-server.authSecretName" . }}
+                  key: {{ .Values.auth.tokenKey }}
+                  optional: true
+            {{- end }}
+            {{- end }}
+            {{- if .Values.aws.region }}
+            - name: AWS_REGION
+              value: {{ .Values.aws.region | quote }}
+            {{- end }}
+            {{- if .Values.aws.profile }}
+            - name: AWS_PROFILE
+              value: {{ .Values.aws.profile | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if or .Values.tls.caCert .Values.tls.clientCert .Values.tls.existingSecret }}
+            - name: tls-certs
+              mountPath: /etc/prometheus-mcp/tls
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        {{- if or .Values.tls.caCert .Values.tls.clientCert .Values.tls.existingSecret }}
+        - name: tls-certs
+          secret:
+            secretName: {{ include "prometheus-mcp-server.tlsSecretName" . }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

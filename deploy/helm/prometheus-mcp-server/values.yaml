@@ -1,0 +1,236 @@
+# Default values for prometheus-mcp-server
+
+# -- Number of replicas
+replicaCount: 2
+
+image:
+  # -- Image repository
+  repository: ghcr.io/your-org/prometheus-mcp-server
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag (defaults to chart appVersion)
+  tag: ""
+
+# -- Image pull secrets
+imagePullSecrets: []
+
+# -- Override the name
+nameOverride: ""
+
+# -- Override the full name
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create service account
+  create: true
+  # -- Annotations for service account
+  annotations: {}
+  # -- Service account name
+  name: ""
+
+# -- Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+# -- Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# -- Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port (MCP standard: 8000)
+  port: 8000
+
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+  # -- Ingress hosts
+  hosts:
+    - host: prometheus-mcp.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- Ingress TLS configuration
+  tls: []
+
+# -- Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  # -- Enable HPA
+  enabled: false
+  # -- Minimum replicas
+  minReplicas: 2
+  # -- Maximum replicas
+  maxReplicas: 10
+  # -- Target CPU utilization percentage
+  targetCPUUtilizationPercentage: 70
+  # -- Target memory utilization percentage
+  targetMemoryUtilizationPercentage: 80
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity rules
+affinity: {}
+
+# -- Topology spread constraints
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: prometheus-mcp-server
+
+# Pod disruption budget
+podDisruptionBudget:
+  # -- Enable PDB
+  enabled: true
+  # -- Minimum available pods
+  minAvailable: 1
+
+# Prometheus configuration
+prometheus:
+  # -- Prometheus URL
+  url: "http://prometheus-server.monitoring.svc.cluster.local:9090"
+
+# Authentication configuration
+auth:
+  # -- Authentication type: none, basic, bearer, aws_sigv4
+  type: "none"
+  # -- Basic auth username
+  username: ""
+  # -- Basic auth password (use existingSecret for production)
+  password: ""
+  # -- Bearer token (use existingSecret for production)
+  token: ""
+  # -- Existing secret name for auth credentials
+  existingSecret: ""
+  # -- Key in existing secret for auth type
+  authTypeKey: "auth-type"
+  # -- Key in existing secret for username
+  usernameKey: "username"
+  # -- Key in existing secret for password
+  passwordKey: "password"
+  # -- Key in existing secret for token
+  tokenKey: "token"
+
+# AWS configuration (for aws_sigv4 auth)
+aws:
+  # -- AWS region
+  region: ""
+  # -- AWS profile
+  profile: ""
+
+# TLS configuration
+tls:
+  # -- Verify TLS certificates
+  verify: true
+  # -- CA certificate (base64 encoded)
+  caCert: ""
+  # -- Client certificate (base64 encoded)
+  clientCert: ""
+  # -- Client key (base64 encoded)
+  clientKey: ""
+  # -- Existing secret for TLS certificates
+  existingSecret: ""
+
+# Server configuration
+server:
+  # -- Request timeout in seconds
+  timeout: 30
+  # -- Maximum retry attempts
+  maxRetries: 3
+  # -- Initial retry delay in seconds
+  retryDelay: 1.0
+  # -- Maximum concurrent connections
+  maxConnections: 10
+
+# Logging configuration
+logging:
+  # -- Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+  # -- Log format: json, text
+  format: "json"
+
+# Features
+features:
+  # -- Enable dangerous tools (delete series, etc.)
+  enableDangerousTools: false
+  # -- Maximum query samples
+  maxQuerySamples: 50000
+  # -- Default lookback period
+  defaultLookback: "1h"
+  # -- Default step for range queries
+  defaultStep: "1m"
+
+# Network policy
+networkPolicy:
+  # -- Enable network policy
+  enabled: true
+  # -- Ingress rules (empty = allow all)
+  ingress: []
+  # -- Additional egress rules
+  egress: []
+
+# Probes configuration
+probes:
+  liveness:
+    # -- Enable liveness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 10
+    # -- Period seconds
+    periodSeconds: 30
+    # -- Timeout seconds
+    timeoutSeconds: 5
+    # -- Failure threshold
+    failureThreshold: 3
+  readiness:
+    # -- Enable readiness probe
+    enabled: true
+    # -- Initial delay seconds
+    initialDelaySeconds: 5
+    # -- Period seconds
+    periodSeconds: 10
+    # -- Timeout seconds
+    timeoutSeconds: 3
+    # -- Failure threshold
+    failureThreshold: 3
+
+# Extra environment variables
+extraEnv: []
+
+# Extra volumes
+extraVolumes: []
+
+# Extra volume mounts
+extraVolumeMounts: []
